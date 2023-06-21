@@ -4,6 +4,10 @@ import com.tpe.domain.Customer;
 import com.tpe.dto.CustomerDTO;
 import com.tpe.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -66,5 +70,42 @@ public class CustomerController {
         customerService.deleteCustomerById(id);
         return ResponseEntity.ok("Customer is deleted successfully");
     }
+
+    //task 7: id ile customeri update etme->ttp://localhost:8080/customers/update/1
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> upddateCustomer(@PathVariable("id") Long id, @RequestBody CustomerDTO customerDTO){
+        customerService.updateCustomer(id,customerDTO);
+        return ResponseEntity.ok("Customer is updated successfully");
+    }
+
+    //8-Tüm customerları page page getirme->http://localhost:8080/customers/page=1&size=2&sort=id&direction=ASC
+    @GetMapping("/page")
+    public ResponseEntity<Page<Customer>> getAllCustomersWithPage (@RequestParam("page") int page, //hangi sayfa
+                                                                   @RequestParam("size") int size, //bir sayfada kac adet customer olsun
+                                                                   @RequestParam("sort") String prop, //sirlamanin turu
+                                                                   @RequestParam("direction") Sort.Direction direction) /*ASC,DESC*/
+    {
+        Pageable pageable = PageRequest.of(page,size,Sort.by(direction,prop));
+        Page<Customer> customerPage = customerService.getAllCustomersWithPage(pageable);
+        return ResponseEntity.ok(customerPage);
+    }
+
+    //9.Name bilgisi ile customer getirme->http://localhost:8080/customers/query?name=Jack
+    @GetMapping("/query")
+    public ResponseEntity<List<Customer>> getCustomerByName(@RequestParam("name") String name){
+        List<Customer>  customerList = customerService.getCustomerByName(name);
+        return ResponseEntity.ok(customerList);
+    }
+
+    //10.Name ve lastName bilgisi ile customer getirme->http://localhost:8080/customers/fullquery?name=Jack&lastName=Sparrow
+    @GetMapping("/fullquery")
+    public ResponseEntity<List<Customer>> getCustomerByFullname(@RequestParam("name") String name,
+                                                                @RequestParam("lastName") String lastName){
+        List<Customer> customerList = customerService.getCustomerByFullName(name,lastName);
+        return ResponseEntity.ok(customerList);
+    }
+
+    //11.İsmi ... içeren customer ları getirme->http://localhost:8080/customers/jpql?name=Ja
+    //@GetMapping("/jpql")
 
 }
